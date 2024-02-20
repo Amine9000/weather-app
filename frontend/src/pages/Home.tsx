@@ -2,7 +2,7 @@ import { MainNav } from "@/components/app-ui/main-nav";
 import { Overview } from "@/components/app-ui/overview";
 import { RecentData } from "@/components/app-ui/RecentData";
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from "@/components/ui/card";
-import { CloudRainWind, CloudSun, Droplet, Droplets, Gauge, GaugeCircle, Sun, SunDim, ThermometerSun, Tornado, Waves, Wind } from "lucide-react";
+import { CloudRainWind, Droplet, Droplets, Gauge, GaugeCircle, Snowflake, Sun, SunDim, ThermometerSun, Tornado, Waves, Wind } from "lucide-react";
 import { useEffect, useState } from "react";
 
 const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
@@ -38,7 +38,7 @@ const icons = {
     temperature: {
         l1: <Sun />,
         l2: <SunDim />,
-        l3: <CloudSun />,
+        l3: <Snowflake />,
     },
     pressure: {
         l1: <Gauge />,
@@ -54,6 +54,25 @@ const icons = {
         l1: <Tornado />,
         l2: <CloudRainWind />,
         l3: <Wind />,
+    }
+};
+
+const intervals = {
+    temperature: {
+        l1: 25,
+        l2: 0,
+    },
+    pressure: {
+        l1: 25,
+        l2: 10,
+    },
+    humidity: {
+        l1: 70,
+        l2: 40,
+    },
+    windv: {
+        l1: 10,
+        l2: 1,
     }
 };
 
@@ -92,10 +111,10 @@ function classifyData(datatype: datatypeEnum, d: number, i: number) {
     currentDate.setDate(currentDate.getDate() + i);
     const formattedDate = `${days_long[currentDate.getDay()]} ${currentDate.getDate()}`;
     const dayState: recentDataType = { icon: null, message: "", formattedDate: formattedDate, value: singleData };
-    if (singleData > 25) {
+    if (singleData > intervals[datatype].l1) {
         dayState.icon = icons[datatype].l1;
         dayState.message = messages[datatype].l1;
-    } else if (singleData <= 25 && singleData > 10) {
+    } else if (singleData <= intervals[datatype].l1 && singleData > intervals[datatype].l2) {
         dayState.icon = icons[datatype].l2;
         dayState.message = messages[datatype].l2;
     } else {
@@ -185,19 +204,19 @@ function Home() {
     }
 
     return (<>
-        <div className="flex-col md:flex">
+        <div className="h-screen flex-col flex">
             <div className="border-b">
                 <div className="flex h-16 items-center px-4">
                     <MainNav className="mx-6" />
                 </div>
             </div>
-            <div className="flex-1 p-4 pt-2">
-                <div className="flex flex-col my-4">
+            <div className="flex-grow flex flex-col flex-1 p-4 pt-2">
+                <div className="flex flex-col my-4 justify-start items-start">
                     <h2 className="text-3xl font-bold tracking-tight">SkyCast</h2>
                     <small className="text-gray-800 mt-2">SkyCast: Instant weather insights for your day, rain or shine.</small>
                 </div>
 
-                <div>
+                <div className=" flex-grow flex flex-col justify-around">
                     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 my-4">
                         <Card className={`cursor-pointer ${dataTypeClasses.pressure}`} onClick={() => handleDatatypeChange("pressure")}>
                             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -209,7 +228,7 @@ function Home() {
                             <CardContent>
                                 <div className="text-2xl font-bold">{currentData.pressure.value} {currentData.pressure.unit}</div>
                                 <p className="text-xs text-muted-foreground">
-                                    +20.1% from last month
+                                    Air weight and stability.
                                 </p>
                             </CardContent>
                         </Card>
@@ -221,9 +240,9 @@ function Home() {
                                 <Droplets className="h-6 w-6 text-muted-foreground" />
                             </CardHeader>
                             <CardContent>
-                                <div className="text-2xl font-bold flex gap-2 items-center">{currentData.humidity.value} {currentData.humidity.unit}</div>
+                                <div className="text-2xl font-bold">{currentData.humidity.value} {currentData.humidity.unit}</div>
                                 <p className="text-xs text-muted-foreground">
-                                    +180.1% from last month
+                                    Air moisture level.
                                 </p>
                             </CardContent>
                         </Card>
@@ -235,7 +254,7 @@ function Home() {
                             <CardContent>
                                 <div className="text-2xl font-bold">{currentData.temperature.value} {currentData.temperature.unit}</div>
                                 <p className="text-xs text-muted-foreground">
-                                    +19% from last month
+                                    Air warmth or coolness.
                                 </p>
                             </CardContent>
                         </Card>
@@ -247,9 +266,9 @@ function Home() {
                                 <Wind className="h-6 w-6 text-muted-foreground" />
                             </CardHeader>
                             <CardContent>
-                                <div className="text-2xl font-bold flex items-baseline gap-2">{currentData.windv.value} {currentData.windv.unit}</div>
+                                <div className="text-2xl font-bold">{currentData.windv.value} {currentData.windv.unit}</div>
                                 <p className="text-xs text-muted-foreground">
-                                    +201 since last hour
+                                    Air speed and movement.
                                 </p>
                             </CardContent>
                         </Card>

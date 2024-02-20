@@ -18,8 +18,8 @@ export function RecentData({ data, unit }: { data: recentDataType[], unit: React
               </AvatarFallback>
             </Avatar>
             <div className="ml-4 space-y-1">
-              <p className="text-sm font-medium leading-none">{d.formattedDate}</p>
-              <p className="text-sm text-muted-foreground">
+              <p className="text-sm font-medium leading-none text-start">{d.formattedDate}</p>
+              <p className="text-sm text-muted-foreground text-start">
                 {d.message}
               </p>
             </div>

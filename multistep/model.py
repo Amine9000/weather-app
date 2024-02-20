@@ -1,10 +1,6 @@
 import os
 import datetime
 
-import IPython
-import IPython.display
-import matplotlib as mpl
-import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import seaborn as sns
@@ -13,10 +9,6 @@ import keras
 
 from multistep.windowGenerator import WindowGenerator
 from multistep.utils import compile_and_fit
-
-
-mpl.rcParams['figure.figsize'] = (8, 6)
-mpl.rcParams['axes.grid'] = False
 
 zip_path = tf.keras.utils.get_file(
     origin='https://storage.googleapis.com/tensorflow/tf-keras-datasets/jena_climate_2009_2016.csv.zip',
@@ -88,10 +80,10 @@ multi_window = WindowGenerator(input_width=24,
                                test_df=test_df,
                                shift=OUT_STEPS)
 
-
-def tempModel():
+def buildModel():
     try:
-        multi_lstm_model = keras.models.load_model('multistep/tempModel.keras')
+        global multi_lstm_model
+        multi_lstm_model = keras.models.load_model('multistep/model.keras')
     except:
         multi_lstm_model = tf.keras.Sequential([
             # Shape [batch, time, features] => [batch, lstm_units].
@@ -106,8 +98,11 @@ def tempModel():
 
         history = compile_and_fit(multi_lstm_model, multi_window)
 
-        multi_lstm_model.save("multistep/tempModel.keras")
-    
+        multi_lstm_model.save("multistep/model.keras")
+
+buildModel()
+
+def tempModel():    
     plot_col_index = multi_window.column_indices['T (degC)']
     if multi_window.label_columns:
       label_col_index = multi_window.label_columns_indices.get('T (degC)', None)
@@ -121,24 +116,6 @@ def tempModel():
 
 
 def presModel():
-    try:
-        multi_lstm_model = keras.models.load_model('multistep/presModel.keras')
-    except:
-        multi_lstm_model = tf.keras.Sequential([
-            # Shape [batch, time, features] => [batch, lstm_units].
-            # Adding more `lstm_units` just overfits more quickly.
-            tf.keras.layers.LSTM(32, return_sequences=False),
-            # Shape => [batch, out_steps*features].
-            tf.keras.layers.Dense(OUT_STEPS*num_features,
-                                kernel_initializer=tf.initializers.zeros()),
-            # Shape => [batch, out_steps, features].
-            tf.keras.layers.Reshape([OUT_STEPS, num_features])
-        ])
-
-        history = compile_and_fit(multi_lstm_model, multi_window)
-
-        multi_lstm_model.save("multistep/presModel.keras")
-    
     plot_col_index = multi_window.column_indices['p (mbar)']
     if multi_window.label_columns:
       label_col_index = multi_window.label_columns_indices.get('p (mbar)', None)
@@ -152,24 +129,6 @@ def presModel():
 
 
 def humModel():
-    try:
-        multi_lstm_model = keras.models.load_model('multistep/humModel.keras')
-    except:
-        multi_lstm_model = tf.keras.Sequential([
-            # Shape [batch, time, features] => [batch, lstm_units].
-            # Adding more `lstm_units` just overfits more quickly.
-            tf.keras.layers.LSTM(32, return_sequences=False),
-            # Shape => [batch, out_steps*features].
-            tf.keras.layers.Dense(OUT_STEPS*num_features,
-                                kernel_initializer=tf.initializers.zeros()),
-            # Shape => [batch, out_steps, features].
-            tf.keras.layers.Reshape([OUT_STEPS, num_features])
-        ])
-
-        history = compile_and_fit(multi_lstm_model, multi_window)
-
-        multi_lstm_model.save("multistep/humModel.keras")
-    
     plot_col_index = multi_window.column_indices['rh (%)']
     if multi_window.label_columns:
       label_col_index = multi_window.label_columns_indices.get('rh (%)', None)
@@ -183,25 +142,7 @@ def humModel():
 
 
 
-def windVModel():
-    try:
-        multi_lstm_model = keras.models.load_model('multistep/windVModel.keras')
-    except:
-        multi_lstm_model = tf.keras.Sequential([
-            # Shape [batch, time, features] => [batch, lstm_units].
-            # Adding more `lstm_units` just overfits more quickly.
-            tf.keras.layers.LSTM(32, return_sequences=False),
-            # Shape => [batch, out_steps*features].
-            tf.keras.layers.Dense(OUT_STEPS*num_features,
-                                kernel_initializer=tf.initializers.zeros()),
-            # Shape => [batch, out_steps, features].
-            tf.keras.layers.Reshape([OUT_STEPS, num_features])
-        ])
-
-        history = compile_and_fit(multi_lstm_model, multi_window)
-
-        multi_lstm_model.save("multistep/windVModel.keras")
-    
+def windVModel():    
     plot_col_index_wx = multi_window.column_indices['Wx']
     plot_col_index_wy = multi_window.column_indices['Wx']
     if multi_window.label_columns:
@@ -210,7 +151,6 @@ def windVModel():
     else:
       label_col_index_wx = plot_col_index_wx
       label_col_index_wy = plot_col_index_wy
-
     inputs, labels = multi_window.example
     labels = labels*train_std + train_mean
     predictions = multi_lstm_model(inputs)*train_std + train_mean

@@ -11,19 +11,19 @@ export function MainNav({
       {...props}
     >
       <Link
-        to="/examples/dashboard"
+        to="/"
         className="text-sm font-medium transition-colors hover:text-primary"
       >
         Home
       </Link>
       <Link
-        to="/examples/dashboard"
+        to="/about"
         className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary"
       >
         About
       </Link>
       <Link
-        to="/examples/dashboard"
+        to="/contact"
         className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary"
       >
         Contact

@@ -1,15 +1,9 @@
-* {
-  outline: 1px solid red;
-}
-
 body::-webkit-scrollbar {
   display: none;
 }
-
 #root {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
+  min-width: 100vw;
+  min-height: 100vh;
   text-align: center;
 }
 
