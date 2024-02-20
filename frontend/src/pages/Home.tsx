@@ -2,7 +2,7 @@ import { MainNav } from "@/components/app-ui/main-nav";
 import { Overview } from "@/components/app-ui/overview";
 import { RecentData } from "@/components/app-ui/RecentData";
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from "@/components/ui/card";
-import { CloudRainWind, CloudSun, CloudSunRain, Droplet, Droplets, Gauge, GaugeCircle, Sun, SunDim, ThermometerSun, Tornado, Waves, Wind } from "lucide-react";
+import { CloudRainWind, CloudSun, Droplet, Droplets, Gauge, GaugeCircle, Sun, SunDim, ThermometerSun, Tornado, Waves, Wind } from "lucide-react";
 import { useEffect, useState } from "react";
 
 const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
