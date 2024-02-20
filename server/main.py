@@ -1,8 +1,8 @@
-from typing import Union
 from multistep.model import getModel
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
+
+
 app = FastAPI()
 
 # Allow all origins during development
@@ -17,23 +17,33 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-class Item(BaseModel):
-    name: str
-    price: float
-    is_offer: Union[bool, None] = None
 
 
-@app.get("/")
-def read_root():
-    output = getModel()
+@app.get("/temperature")
+def get_temperature():
+    output = getModel("temperature")
+    return output
+
+@app.get("/pressure")
+def get_pressure():
+    output = getModel("pressure")
+    return output
+
+@app.get("/humidity")
+def get_pressure():
+    output = getModel("humidity")
+    return output
+
+@app.get("/windv")
+def get_pressure():
+    output = getModel("windv")
     return output
 
 
-@app.get("/items/{item_id}")
-def read_item(item_id: int, q: Union[str, None] = None):
-    return {"item_id": item_id, "q": q}
-
-
-@app.put("/items/{item_id}")
-def update_item(item_id: int, item: Item):
-    return {"item_name": item.name, "item_id": item_id}
+@app.get("/all")
+def get_pressure():
+    temp = getModel("temperature")
+    press = getModel("pressure")
+    hum = getModel("humidity")
+    windv = getModel("windv")
+    return {"temp":temp[1][0],"press":press[1][0],"hum":hum[1][0],"windv":windv[1][0]}

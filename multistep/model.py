@@ -88,9 +88,10 @@ multi_window = WindowGenerator(input_width=24,
                                test_df=test_df,
                                shift=OUT_STEPS)
 
-def getModel():
+
+def tempModel():
     try:
-        multi_lstm_model = keras.models.load_model('multistep/model.keras')
+        multi_lstm_model = keras.models.load_model('multistep/tempModel.keras')
     except:
         multi_lstm_model = tf.keras.Sequential([
             # Shape [batch, time, features] => [batch, lstm_units].
@@ -105,7 +106,7 @@ def getModel():
 
         history = compile_and_fit(multi_lstm_model, multi_window)
 
-        multi_lstm_model.save("multistep/model.keras")
+        multi_lstm_model.save("multistep/tempModel.keras")
     
     plot_col_index = multi_window.column_indices['T (degC)']
     if multi_window.label_columns:
@@ -117,3 +118,117 @@ def getModel():
     labels = labels*train_std + train_mean
     predictions = multi_lstm_model(inputs)*train_std + train_mean
     return [labels[1, :, label_col_index].numpy().tolist() ,predictions[1, :, label_col_index].numpy().tolist()]
+
+
+def presModel():
+    try:
+        multi_lstm_model = keras.models.load_model('multistep/presModel.keras')
+    except:
+        multi_lstm_model = tf.keras.Sequential([
+            # Shape [batch, time, features] => [batch, lstm_units].
+            # Adding more `lstm_units` just overfits more quickly.
+            tf.keras.layers.LSTM(32, return_sequences=False),
+            # Shape => [batch, out_steps*features].
+            tf.keras.layers.Dense(OUT_STEPS*num_features,
+                                kernel_initializer=tf.initializers.zeros()),
+            # Shape => [batch, out_steps, features].
+            tf.keras.layers.Reshape([OUT_STEPS, num_features])
+        ])
+
+        history = compile_and_fit(multi_lstm_model, multi_window)
+
+        multi_lstm_model.save("multistep/presModel.keras")
+    
+    plot_col_index = multi_window.column_indices['p (mbar)']
+    if multi_window.label_columns:
+      label_col_index = multi_window.label_columns_indices.get('p (mbar)', None)
+    else:
+      label_col_index = plot_col_index
+
+    inputs, labels = multi_window.example
+    labels = labels*train_std + train_mean
+    predictions = multi_lstm_model(inputs)*train_std + train_mean
+    return [labels[1, :, label_col_index].numpy().tolist() ,predictions[1, :, label_col_index].numpy().tolist()]
+
+
+def humModel():
+    try:
+        multi_lstm_model = keras.models.load_model('multistep/humModel.keras')
+    except:
+        multi_lstm_model = tf.keras.Sequential([
+            # Shape [batch, time, features] => [batch, lstm_units].
+            # Adding more `lstm_units` just overfits more quickly.
+            tf.keras.layers.LSTM(32, return_sequences=False),
+            # Shape => [batch, out_steps*features].
+            tf.keras.layers.Dense(OUT_STEPS*num_features,
+                                kernel_initializer=tf.initializers.zeros()),
+            # Shape => [batch, out_steps, features].
+            tf.keras.layers.Reshape([OUT_STEPS, num_features])
+        ])
+
+        history = compile_and_fit(multi_lstm_model, multi_window)
+
+        multi_lstm_model.save("multistep/humModel.keras")
+    
+    plot_col_index = multi_window.column_indices['rh (%)']
+    if multi_window.label_columns:
+      label_col_index = multi_window.label_columns_indices.get('rh (%)', None)
+    else:
+      label_col_index = plot_col_index
+
+    inputs, labels = multi_window.example
+    labels = labels*train_std + train_mean
+    predictions = multi_lstm_model(inputs)*train_std + train_mean
+    return [labels[1, :, label_col_index].numpy().tolist() ,predictions[1, :, label_col_index].numpy().tolist()]
+
+
+
+def windVModel():
+    try:
+        multi_lstm_model = keras.models.load_model('multistep/windVModel.keras')
+    except:
+        multi_lstm_model = tf.keras.Sequential([
+            # Shape [batch, time, features] => [batch, lstm_units].
+            # Adding more `lstm_units` just overfits more quickly.
+            tf.keras.layers.LSTM(32, return_sequences=False),
+            # Shape => [batch, out_steps*features].
+            tf.keras.layers.Dense(OUT_STEPS*num_features,
+                                kernel_initializer=tf.initializers.zeros()),
+            # Shape => [batch, out_steps, features].
+            tf.keras.layers.Reshape([OUT_STEPS, num_features])
+        ])
+
+        history = compile_and_fit(multi_lstm_model, multi_window)
+
+        multi_lstm_model.save("multistep/windVModel.keras")
+    
+    plot_col_index_wx = multi_window.column_indices['Wx']
+    plot_col_index_wy = multi_window.column_indices['Wx']
+    if multi_window.label_columns:
+      label_col_index_wx = multi_window.label_columns_indices.get('Wx', None)
+      label_col_index_wy = multi_window.label_columns_indices.get('Wy', None)
+    else:
+      label_col_index_wx = plot_col_index_wx
+      label_col_index_wy = plot_col_index_wy
+
+    inputs, labels = multi_window.example
+    labels = labels*train_std + train_mean
+    predictions = multi_lstm_model(inputs)*train_std + train_mean
+    Wx = labels[1, :, label_col_index_wx]
+    Wy = labels[1, :, label_col_index_wy]
+    Wv = np.sqrt(Wx**2 + Wy**2)
+    windvPred_x = predictions[1, :, label_col_index_wx]
+    windvPred_y = predictions[1, :, label_col_index_wy]
+    windvPred = np.sqrt(windvPred_x**2 + windvPred_y**2)
+    return [Wv.tolist() ,windvPred.tolist()]
+
+
+def getModel(data_t):
+    if data_t == "pressure":
+        return presModel()
+    elif data_t == "temperature":
+        return tempModel()
+    elif data_t == "windv":
+        return windVModel()
+    elif data_t == "humidity":
+        return humModel()
